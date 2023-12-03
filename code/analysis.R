@@ -1,4 +1,3 @@
-setwd('~/05. Scripts/08. Big Data Bowl 2024/code')
 library(tidyverse)
 library(fuzzyjoin)
 library(gganimate)
