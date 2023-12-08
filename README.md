@@ -1,5 +1,5 @@
-# bayesian-index-for-tackle-efficacy
-This repository contains all working material pertinent to the BITE: Bayesian Index for Tackle Efficacy [notebook](https://www.kaggle.com/code/brunoscodari/bite-bayesian-index-for-tackle-efficacy), which was submitted to the 2024 NFL Big Data Bowl [competition](https://www.kaggle.com/competitions/nfl-big-data-bowl-2024). 
+# bayesian-index-for-tackle-efficiency
+This repository contains all working material pertinent to the BITE: Bayesian Index for Tackle Efficiency [notebook](https://www.kaggle.com/code/brunoscodari/bite-bayesian-index-for-tackle-efficiency), which was submitted to the 2024 NFL Big Data Bowl [competition](https://www.kaggle.com/competitions/nfl-big-data-bowl-2024). 
 
 ## Reproducibility
 For those seeking to reproduce our work, we recommend the following: 
@@ -7,8 +7,8 @@ For those seeking to reproduce our work, we recommend the following:
 - Clone a remote copy of the repository to your local machine and navigate to the root directory:
 
 ```
-git clone https://github.com/bscod27/bayesian-index-for-tackle-efficacy.git
-cd bayesian-index-for-tackle-efficacy.git
+git clone https://github.com/bscod27/bayesian-index-for-tackle-efficiency.git
+cd bayesian-index-for-tackle-efficiency.git
 ``` 
 
 - Download the files from the `data` folder (pulled directly from the competition website)
