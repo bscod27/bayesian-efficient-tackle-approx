@@ -3,7 +3,7 @@ This repository contains all working material pertinent to the BITE: Bayesian In
 
 ## Reproducibility
 For those seeking to reproduce our work, we recommend the following: 
-- Install the specific version of `R` and required packages outlined in `requirements.txt`
+- Install/load the required R packages outlined in `requirements.txt`
 - Clone a remote copy of the repository to your local machine and navigate to the root directory:
 
 ```
