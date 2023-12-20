@@ -1,3 +1,4 @@
+setwd('~/05. Scripts/08. Big Data Bowl 2024/code')
 library(tidyverse)
 library(fuzzyjoin)
 library(gganimate)
@@ -93,9 +94,9 @@ df_sportsref <- sportsreference %>%
 
 
 ##### Figure out the priors #####
-Solve.Prior <- function(mu, sigsq) {
-  a <- (mu*(1-mu)-sigsq) / (sigsq*(1+((1-mu)/mu)))
-  b <- (a*(1-mu))/mu
+Estimate.MoM <- function(mu, sigsq) {
+  a <- mu * (((mu * (1-mu)) / sigsq) - 1)
+  b <- (1-mu) * (((mu * (1-mu)) / sigsq) - 1)
   return(data.frame(a, b))
 }
 
@@ -133,8 +134,8 @@ priors <- joined %>%
     impact = ifelse(!is.na(impact), impact, ((team_avg * team_n) + (pos_avg * pos_n)) / (team_n + pos_n)),
     mu = impact,
     sigsq = var(impact, na.rm=TRUE),  
-    a = Solve.Prior(mu, sigsq)$a,
-    b = Solve.Prior(mu, sigsq)$b
+    a = Estimate.MoM(mu, sigsq)$a,
+    b = Estimate.MoM(mu, sigsq)$b
   ) %>% 
   arrange(desc(impact), displayName) %>% 
   select(displayName, defensiveTeam, position, attempted=attempted, impact, a, b)
@@ -260,7 +261,7 @@ for (frame in unique(example$frameId)) {
 }
 
 Transform.BITE <- function(player, football, a, b, x, n) {
-  input <- ifelse(football<0, player + football, player+sqrt(football))
+  input <- ifelse(football<0, player+football, player+sqrt(football))
   probs <- 1/(1+exp(0.5*(input)))
   return(qbeta(probs, a+x, b+n-x))
 }
@@ -391,7 +392,7 @@ animate.bite <- example.play %>%
   geom_line() +
   geom_point(size = 7, fill = "#0085CA", color = "#0085CA") +  # Filled blue points
   geom_text(aes(label = jerseyNumber), color = 'white', size = 3) +  # White-colored text inside points
-  labs(x = TeX('\\it{t}'), y = TeX('$\\it{BITE}$ (scaled to a 0-100 range'), title = NULL) +
+  labs(x = TeX('\\it{t}'), y = TeX('$\\it{BITE_t}$ (scaled to a 0-100 range)'), title = NULL) +
   transition_reveal(along = frameId) +
   theme_minimal() +
   geom_vline(data = times, aes(xintercept = time, color = event), linetype = "dashed") +
