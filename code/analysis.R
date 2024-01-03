@@ -144,7 +144,7 @@ priors <- joined %>%
 ##### Calculate cumulative likelihood across the weeks #####
 player_week_summary <- df_bdb %>% 
   group_by(displayName, defensiveTeam, position, week) %>% 
-  summarize(x=sum(success), n=sum(trial))
+  summarize(x_init=sum(success), n_init=sum(trial))
 
 likelihood <- data.frame(
     sapply(unique(df_bdb[, c('displayName', 'defensiveTeam', 'position')]), function(i) rep(i, 9))
@@ -155,19 +155,23 @@ likelihood <- data.frame(
   mutate_if(is.numeric, ~replace_na(., 0)) %>% 
   group_by(displayName, defensiveTeam, position) %>% 
   mutate(
-    x_cumulative = cumsum(x), 
-    n_cumulative = cumsum(n), 
+    x_stat = cumsum(x_init), 
+    n_stat = cumsum(n_init), 
   )
 
 
-##### Calculate BITE #####
+##### Calculate BITE and credible intervals #####
 out <- likelihood %>% 
-  select(-x, -n) %>% 
+  select(-x_init, -n_init) %>% 
   left_join(
     priors %>% select(displayName, defensiveTeam, position, a, b), 
     by = c('displayName', 'defensiveTeam', 'position')) %>% 
   select(displayName, position, defensiveTeam, everything(.)) %>% 
-  mutate(BITE = (a + x_cumulative) / (a + b + n_cumulative))
+  mutate(
+    BITE = (a + x_stat) / (a + b + x_stat), 
+    BITE_LB = qbeta(0.025, a+x_stat, b+n_stat-x_stat),
+    BITE_UB = qbeta(0.975, a+x_stat, b+n_stat-x_stat)
+    ) 
 
 # example distribution for Foresade Oluokun
 png('../results/example_distributions.png', units='in', width = 7.5, height = 5, res = 500)
@@ -179,8 +183,8 @@ plot(
   main=TeX('Prior, likelihood, posterior, and $\\it{BITE}$ for Foyesade Oluokun (Week 9)'), 
   col='red'
   ) # prior
-lines(density(qbinom(x, sample$n_cumulative, sample$x_cumulative/sample$n_cumulative)/sample$n_cumulative), col='blue') # likelihood
-lines(density(qbeta(x, sample$a+sample$x_cumulative, sample$b+sample$n_cumulative-sample$x_cumulative)), col='black')
+lines(density(qbinom(x, sample$n_stat, sample$x_stat/sample$n_stat)/sample$n_stat), col='blue') # likelihood
+lines(density(qbeta(x, sample$a+sample$x_stat, sample$b+sample$n_stat-sample$x_stat)), col='black')
 legend('topleft', legend = c('Prior', 'Likelihood (scaled)', 'Posterior', TeX('$\\it{BITE}$')), col = c('red', 'blue', 'black', 'black'),lty=c(1,1,1,3))
 abline(v=sample$BITE, col = 'black', lty=3)
 dev.off()
@@ -192,8 +196,9 @@ Display.Rankings <- function(pos, wk=9) {
     as.data.frame(.) %>% 
     filter(position == pos, week == wk) %>% 
     arrange(desc(BITE)) %>% 
-    select(displayName, defensiveTeam, x_cumulative, n_cumulative, a, b, BITE) %>% 
-    mutate(BITE_STD = (BITE-mean(BITE))/sd(BITE))
+    select(displayName, defensiveTeam, x_stat, n_stat, a, b, contains('BITE')) %>% 
+    mutate(BITE_probs = 1-pbeta(0.85, a+x_stat, b+n_stat-x_stat)) %>%  # pro bowl level
+    mutate_at(vars(contains('BITE')), function(i) round(i * 100, 1))
   return(stats)
 }
 
@@ -284,12 +289,12 @@ example.play <- example %>%
   mutate(
     BITE_frame = ifelse(
       is.na(BITE), NA, 
-      Transform.BITE(player_dist, football_dist, a, b, x_cumulative, n_cumulative)
+      Transform.BITE(player_dist, football_dist, a, b, x_stat, n_stat)
       )
     ) %>%
   select(
     playDescription, frameId, nflId, displayName, jerseyNumber, defensiveTeam, possessionTeam,
-    x, y, player_dist, football_dist,x_cumulative, n_cumulative, a, b, BITE, BITE_frame, event
+    x, y, player_dist, football_dist, x_stat, n_stat, a, b, BITE, BITE_frame, event
     )
 
 
