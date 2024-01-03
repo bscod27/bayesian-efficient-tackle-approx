@@ -262,17 +262,17 @@ for (frame in unique(example$frameId)) {
 
 Transform.BITE <- function(player, football, a, b, x, n) {
   input <- ifelse(football<0, player+football, player+sqrt(football))
-  probs <- 1/(1+exp(0.5*(input)))
+  probs <- 1/(1+exp(1.5 * input))
   return(qbeta(probs, a+x, b+n-x))
 }
 
 # show what this plot looks like
 png('../results/inverse_sigmoid.png', units='in', width = 5, height = 5, res = 500)
-x <- seq(-20, 20, length.out = 100000)
-y <- 1/(1+exp(0.5*(x)))
+x <- seq(-10, 10, length.out = 100000)
+y <- 1/(1+exp(1.5*(x)))
 plot(
   x, y, 'l', xlab=TeX('$\\it{d_t}$ (in yards)'), ylab=TeX('$\\it{p_t}$'), 
-  main=TeX('$\\it{p_t} = \\frac{1}{1+exp\\{0.5\\it{d_t}\\}}$')
+  main=TeX('$\\it{p_t} = \\frac{1}{1+exp\\{1.5\\it{d_t}\\}}$')
   )
 abline(h=0.5, lty = 2, col = 'grey')
 abline(v=0, lty = 2, col = 'grey')
