@@ -197,7 +197,7 @@ Display.Rankings <- function(pos, wk=9) {
     filter(position == pos, week == wk) %>% 
     arrange(desc(BITE)) %>% 
     select(displayName, defensiveTeam, x_stat, n_stat, a, b, contains('BITE')) %>% 
-    mutate(BITE_probs = 1-pbeta(0.85, a+x_stat, b+n_stat-x_stat)) %>%  # pro bowl level
+    mutate(BITE_probs = 1-pbeta(quantile(BITE, .9), a+x_stat, b+n_stat-x_stat)) %>%  # pro bowl level
     mutate_at(vars(contains('BITE')), function(i) round(i * 100, 1))
   return(stats)
 }
